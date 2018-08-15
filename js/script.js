@@ -9,13 +9,6 @@
   
   
     const FrontEnd =(() =>{
-        const Dom= {
-            noteID : 'Note_',
-            noteContainer : 'ul',
-            addbtn : '#addSticker',
-            noteDelete : '.Del'
-
-        }
     })();
  
 
@@ -42,6 +35,28 @@
         
         };
 
+        const modifyNote =(e,mode) =>{
+            let content , targetId;
+            if(mode === "edit"){
+                targetId = e.path[1].id;
+                content = frnEnd.callNote(targetId);
+            }
+            else if(mode === "set"){
+                targetId = e.path[0].id;
+                content = frnEnd.rejectNote(targetId);
+            }
+            if(targetId.length !== 0){
+               BackEnd.setLocalStorage(targetId,content);
+            }
+        }
+
+        const addNote = () => {
+            frnEnd.BuildNote("Note_"+(BackEnd.numberOfNote()+1),"click for edit");
+            setUpEventListner();
+        }
+
+        const deleteNote = (e) => {
+        }
 
         const loadHistyory = () =>{
             let perviousNote ;
