@@ -134,6 +134,10 @@
         }
 
         const deleteNote = (e) => {
+            console.log(e);
+            let id ;
+            id = e.path[2];
+            console.log(id);
         }
 
         const loadHistyory = () =>{
