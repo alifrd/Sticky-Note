@@ -10,7 +10,6 @@ html , body {
     position: fixed;
     font-family:arial,sans-serif;
 }
-
 textarea{
 	font-size: 14px;
 	display: block;
@@ -42,19 +41,29 @@ img.Del:hover{
 }
 
 img#addSticker{
-    margin-left: 1.3%;
-    width: 3%;
-    height: 3%;
+    position: absolute;
+    width: 5%;
+    height: 5%;
     transition: all 0.2s ;
     cursor: pointer;
 }
 img#addSticker:hover{
-    margin-left: 1.2%;
-    width: 3.5%;
-    height: 3.5%;
+    width: 5.5%;
+    height: 5.5%;
     transform: rotate(90deg);
 }
-
+img#reset{
+position: absolute;
+    top: 93%;
+    width: 5%;
+    height: 5%;
+    transition: all 0.2s ;
+    cursor: pointer;
+}
+img#reset:hover{
+    width: 5.5%;
+    height: 5.5%;
+}
 h2,p{
     font-size:100%;
     font-weight:normal;
