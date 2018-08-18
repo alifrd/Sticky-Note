@@ -1,7 +1,7 @@
 (() => {
     
     const BackEnd = (() =>{
-
+        var lastnumber ;
         return{
             setLocalStorage : (id,content)=>{
                 localStorage.setItem(id,content);
@@ -12,11 +12,31 @@
             returnAllNote :() => {
                 let stack = [];
                 let filedbuilder;
-                for (let index = 1; index <= localStorage.length; index++) {
+                if(localStorage.getItem("num"))
+                    lastnumber = localStorage.getItem("num")
+                else{
+                    localStorage.setItem("num",0);
+                    lastnumber = 0 ;
+                }
+                for (let index = 0; index <= lastnumber ; index++) {
                     filedbuilder = "Note_"+index;
-                    stack.push(filedbuilder+"||"+localStorage.getItem(filedbuilder))  ;               
+                    if(localStorage.getItem(filedbuilder))
+                        stack.push(filedbuilder+"||"+localStorage.getItem(filedbuilder))  ;               
                 }
                 return stack;
+            },
+            delItem : (key) =>{
+                 localStorage.removeItem(key);
+            },
+            incresNum : () =>{
+                lastnumber++;
+                localStorage.setItem("num",lastnumber); 
+            },
+            returnLastNumber : () =>{
+                return lastnumber;
+            },
+            clearLocalStroage : () =>{
+                localStorage.clear();
             }
         }
     })();
@@ -31,7 +51,8 @@
             noteID : 'Note_',
             noteContainer : 'ul',
             addbtn : '#addSticker',
-            noteDelete : '.Del'
+            noteDelete : '.Del',
+            reset : '#reset'
 
         }
 
@@ -84,6 +105,10 @@
                     note = ele.split("||");
                     noteBuilder(note[0],note[1]);
                 });
+            },
+            delNote : (key) =>{
+                var div = document.getElementById(key);
+                div.parentNode.removeChild(div);
             }
            
         }
@@ -102,42 +127,48 @@
           
             const Notes = document.querySelectorAll('li');
             Notes.forEach(element => {
-                element.addEventListener('click',function(e){   modifyNote(e,"edit");   });
+                element.addEventListener('click',function(e){  modifyNote(e,"edit");   });
                 element.addEventListener('mouseleave',function(e){  modifyNote(e,"set");    });
             });
             
             document.querySelector(Dom.addbtn).addEventListener('click' , addNote )
-            document.querySelector(Dom.noteDelete).addEventListener('click' , function(e) {
-                deleteNote(e);     
-            });
-        
+            document.querySelector(Dom.reset).addEventListener('click' , resetAll )
+          
         };
 
         const modifyNote =(e,mode) =>{
             let content , targetId;
-            if(mode === "edit"){
-                targetId = e.path[1].id;
-                content = frnEnd.callNote(targetId);
+            mode = e.path[0].className === "Del" ? "delete" : mode ;
+            if(mode === "delete"){
+                deleteNote(e);
             }
-            else if(mode === "set"){
-                targetId = e.path[0].id;
-                content = frnEnd.rejectNote(targetId);
-            }
-            if(targetId.length !== 0){
-               BackEnd.setLocalStorage(targetId,content);
+            else {
+                if(mode === "edit"){
+                    targetId = e.path[1].id;
+                    content = frnEnd.callNote(targetId);
+                }
+                else if(mode === "set"){
+                    targetId = e.path[0].id;
+                    content = frnEnd.rejectNote(targetId);
+                }
+                if(targetId.length !== 0){
+                BackEnd.setLocalStorage(targetId,content);
+                }
             }
         }
 
         const addNote = () => {
-            frnEnd.BuildNote("Note_"+(BackEnd.numberOfNote()+1),"click for edit");
+            frnEnd.BuildNote("Note_"+(BackEnd.returnLastNumber()),"click for edit");
             setUpEventListner();
+            BackEnd.incresNum();
         }
 
         const deleteNote = (e) => {
-            console.log(e);
             let id ;
-            id = e.path[2];
+            id = e.path[2].id;
             console.log(id);
+            BackEnd.delItem(id);
+            frnEnd.delNote(id);
         }
 
         const loadHistyory = () =>{
@@ -146,9 +177,17 @@
             perviousNote =  bckEnd.returnAllNote();
             frnEnd.buildHistory(perviousNote);
         }
+        const resetAll = () =>{
+            if(confirm("Are You Confirm Delete All Notes ??")){
+                BackEnd.clearLocalStroage();
+                location.reload();
+            }
+        }
+
         const init = (() =>{
             loadHistyory();    
             setUpEventListner();
+        
         
         });
 
