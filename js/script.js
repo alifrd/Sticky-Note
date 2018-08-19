@@ -52,7 +52,8 @@
             noteContainer : 'ul',
             addbtn : '#addSticker',
             noteDelete : '.Del',
-            reset : '#reset'
+            reset : '#reset',
+            body: 'body'
 
         }
 
@@ -68,7 +69,7 @@
         }
         const noteBuilder = (id,content)=>{
             let newNote , container ;
-            newNote = `<li raggable="true" style="top: ${getRndInteger(-5,70)}%; left:${getRndInteger(0,80)}%;" id="${id}"><a>${content}<img class="Del" src="img/garbage.svg" alt="Delete it"></a></li>`;
+            newNote = `<li raggable="true" style="top: ${getRndInteger(0,70)}%; left:${getRndInteger(0,80)}%;" id="${id}"><a><img src='img/push-pin1.svg' id='drag' alt='Can Drag It'>${content}<img class="Del" src="img/garbage.svg" alt="Delete it"></a></li>`;
             container = document.querySelector(Dom.noteContainer);
             container.innerHTML += newNote ;
         }
@@ -82,16 +83,18 @@
                     content = getContent(noteId);
                     content = content.trim();    
                     clearContent(noteId);
-                    document.querySelector('#'+noteId).innerHTML = `<a><textarea cols="90" rows="90" maxlength="150">${content}</textarea><img class="Del" src="img/garbage.svg" alt="Delete it"></a>`;
+                    document.querySelector('#'+noteId).innerHTML = `<a><img src='img/push-pin1.svg' id='drag' alt='Can Drag It'><textarea cols="90" rows="90" maxlength="150">${content}</textarea><img class="Del" src="img/garbage.svg" alt="Delete it"></a>`;
                     return content;
                 }
             },
             rejectNote : (noteId) => {
                 if (noteId != ""){
                     let textAreaContent;
+                    if(document.querySelector("#"+noteId+" > a > textarea").value)
                     textAreaContent = document.querySelector("#"+noteId+" > a > textarea").value ;
-                    document.querySelector('#'+noteId).innerHTML = "<a>"+textAreaContent+"<img class=\"Del\" src=\"img/garbage.svg\" alt=\"Delete it\"></a>"; 
-                    return textAreaContent;      
+                    document.querySelector('#'+noteId).innerHTML = "<a><img src='img/push-pin1.svg' id='drag' alt='Can Drag It'>"+textAreaContent+"<img class=\"Del\" src=\"img/garbage.svg\" alt=\"Delete it\"></a>"; 
+                    return textAreaContent;
+                          
                 }
             },
             BuildNote : (id,content) =>{
@@ -109,7 +112,36 @@
             delNote : (key) =>{
                 var div = document.getElementById(key);
                 div.parentNode.removeChild(div);
+            },
+            dragElement : (elmnt) =>{
+                var posX = 0, posY = 0;
+                if (elmnt) {
+                    elmnt.childNodes[0].childNodes[0].onmousedown = dragMouseDown;
+                } else {
+                    elmnt.childNodes[0].childNodes[0].onmousedown = dragMouseDown;
+                }
+            
+                function dragMouseDown(e) {
+                    e = e || window.event;
+                    e.preventDefault();
+                    document.onmouseup = closeDragElement;
+                    document.onmousemove = elementDrag;
+                }
+            
+                function elementDrag(e) {
+                    e = e || window.event;
+                    e.preventDefault();
+                    posX = e.clientX;
+                    posY = e.clientY;
+                    elmnt.style.left = posX + "px";
+                    elmnt.style.top = posY + "px";     
+                }
+                function closeDragElement() {
+                    document.onmouseup = null;
+                    document.onmousemove = null;
+                }
             }
+           
            
         }
     })();
@@ -127,13 +159,15 @@
           
             const Notes = document.querySelectorAll('li');
             Notes.forEach(element => {
-                element.addEventListener('click',function(e){  modifyNote(e,"edit");   });
-                element.addEventListener('mouseleave',function(e){  modifyNote(e,"set");    });
+                element.addEventListener('click',(e) =>{  modifyNote(e,"edit");   });
+                element.addEventListener('mouseleave',(e) =>{  modifyNote(e,"set");    });
+                frnEnd.dragElement(element); 
             });
+            
             
             document.querySelector(Dom.addbtn).addEventListener('click' , addNote )
             document.querySelector(Dom.reset).addEventListener('click' , resetAll )
-          
+            
         };
 
         const modifyNote =(e,mode) =>{
@@ -155,18 +189,19 @@
                 BackEnd.setLocalStorage(targetId,content);
                 }
             }
+            setUpEventListner();    
         }
 
         const addNote = () => {
             frnEnd.BuildNote("Note_"+(BackEnd.returnLastNumber()),"click for edit");
             setUpEventListner();
             BackEnd.incresNum();
+            
         }
 
         const deleteNote = (e) => {
             let id ;
             id = e.path[2].id;
-            console.log(id);
             BackEnd.delItem(id);
             frnEnd.delNote(id);
         }
@@ -183,6 +218,8 @@
                 location.reload();
             }
         }
+        
+        
 
         const init = (() =>{
             loadHistyory();    
